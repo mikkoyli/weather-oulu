@@ -1,0 +1,16 @@
+services:
+  backend:
+    build: ./server
+    container_name: weather-backend
+    ports:
+      - "5001:5001"
+    restart: unless-stopped
+
+  client:
+    build: ./client
+    container_name: weather-frontend
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+    restart: unless-stopped
