@@ -1,6 +1,6 @@
 # Sääsovellus Oulu
 
-Yksinkertainen sääsovellus, jossa **backend hakee säädatan Open-Meteosta**.
+Yksinkertainen sääsovellus, joka hakee säädatan Open-Meteosta.
 
 ## Ominaisuudet
 
