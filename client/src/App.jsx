@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import "./index.css";
 
 function App() {
   const [weather, setWeather] = useState(null);
@@ -7,7 +8,10 @@ function App() {
 
   useEffect(() => {
     fetch("http://localhost:5001/api/weather")
-      .then((res) => res.json())
+      .then((res) => {
+        if (!res.ok) throw new Error(`Palvelin palautti virheen: ${res.status}`);
+        return res.json();
+      })
       .then((data) => {
         setWeather(data);
         setLoading(false);
@@ -20,7 +24,7 @@ function App() {
 
   const getWeatherDescription = (code) => {
     switch (code) {
-      case 0: return "Kirkasta";
+      case 0: return "Selkeää";
       case 1:
       case 2:
       case 3: return "Osittain pilvistä";
@@ -34,7 +38,7 @@ function App() {
       case 65: return "Sadetta";
       case 71:
       case 73:
-      case 75: return "Lumisadetta";
+      case 75: return "Lunta";
       case 95:
       case 96:
       case 99: return "Ukkosta";
@@ -43,7 +47,6 @@ function App() {
   };
 
   if (loading) return <p style={{ textAlign: "center", marginTop: "50px" }}>Ladataan säätietoja...</p>;
-  if (error) return <p style={{ textAlign: "center", marginTop: "50px" }}>Virhe: {error}</p>;
 
   return (
     <div
@@ -51,7 +54,7 @@ function App() {
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
-        height: "100%",
+        height: "100%"
       }}
     >
       <div
@@ -66,11 +69,17 @@ function App() {
           marginLeft: "50px"
         }}
       >
-        <h1>Oulu</h1>
-        <p><strong>Aika:</strong> {weather.time}</p>
-        <p><strong>Lämpötila:</strong> {weather.temperature} °C</p>
-        <p><strong>Tuulen nopeus:</strong> {weather.windspeed} m/s</p>
-        <p><strong>Sää:</strong> {getWeatherDescription(weather.weathercode)}</p>
+        {error ? (
+          <p style={{ color: "red" }}>Virhe: {error}</p>
+        ) : (
+          <>
+            <h1>Oulu</h1>
+            <p><strong>Aika:</strong> {weather.time}</p>
+            <p><strong>Lämpötila:</strong> {weather.temperature} °C</p>
+            <p><strong>Tuulen nopeus:</strong> {weather.windspeed} m/s</p>
+            <p><strong>Sää:</strong> {getWeatherDescription(weather.weathercode)}</p>
+          </>
+        )}
       </div>
     </div>
   );

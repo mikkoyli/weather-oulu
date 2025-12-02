@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-import httpx
+from fastapi.responses import JSONResponse
+import requests
 
 app = FastAPI()
 
@@ -17,22 +18,25 @@ OULU_LAT = 65.0121
 OULU_LON = 25.4651
 
 @app.get("/api/weather")
-async def get_weather():
-    url = (
-        f"https://api.open-meteo.com/v1/forecast?"
-        f"latitude={OULU_LAT}&longitude={OULU_LON}&current_weather=true"
-    )
-
-    async with httpx.AsyncClient() as client:
-        response = await client.get(url)
+def get_weather():
+    try:
+        response = requests.get(f"https://api.open-meteo.com/v1/forecast?latitude={OULU_LAT}&longitude={OULU_LON}&current_weather=true")
         response.raise_for_status()
         data = response.json()
-
-    current = data.get("current_weather", {})
-    return {
-        "place": "Oulu",
-        "time": current.get("time"),
-        "temperature": current.get("temperature"),
-        "windspeed": current.get("windspeed"),
-        "weathercode": current.get("weathercode")
-    }
+        
+        return {
+            "temperature": data["current_weather"]["temperature"],
+            "windspeed": data["current_weather"]["windspeed"],
+            "time": data["current_weather"]["time"],
+            "weathercode": data["current_weather"]["weathercode"]
+        }
+    except requests.exceptions.RequestException as e:
+        return JSONResponse(
+            status_code=503,
+            content={"error": "Sään haku epäonnistui", "details": str(e)}
+        )
+    except KeyError:
+        return JSONResponse(
+            status_code=500,
+            content={"error": "Sään haku epäonnistui", "details": "Väärä API-key"}
+        )
