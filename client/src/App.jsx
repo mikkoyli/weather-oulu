@@ -60,6 +60,7 @@ function App() {
         style={{
           padding: "30px 50px",
           background: "#ffffff",
+          color: "#000000",
           borderRadius: "15px",
           boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
           textAlign: "center",
