@@ -1,42 +1,57 @@
-from fastapi import FastAPI
+import os
+import httpx
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
-import requests
 
 app = FastAPI()
 
-# CORS for development
+ALLOWED_ORIGINS = os.getenv("ALLOWED_ORIGINS", "http://localhost:5173").split(",")
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Don't do this in production
-    allow_methods=["*"],
+    allow_origins=ALLOWED_ORIGINS,
+    allow_methods=["GET"],
     allow_headers=["*"],
 )
 
-# Oulu coordinates
 OULU_LAT = 65.0121
 OULU_LON = 25.4651
 
 @app.get("/api/weather")
-def get_weather():
+async def get_weather():
+    url = "https://api.open-meteo.com/v1/forecast"
+    params = {
+        "latitude": OULU_LAT,
+        "longitude": OULU_LON,
+        "current_weather": "true",
+    }
+
     try:
-        response = requests.get(f"https://api.open-meteo.com/v1/forecast?latitude={OULU_LAT}&longitude={OULU_LON}&current_weather=true")
-        response.raise_for_status()
-        data = response.json()
-        
+        async with httpx.AsyncClient(timeout=5.0) as client:
+            req = await client.get(url, params=params)
+            req.raise_for_status()
+            data = req.json()
+
         return {
             "temperature": data["current_weather"]["temperature"],
             "windspeed": data["current_weather"]["windspeed"],
             "time": data["current_weather"]["time"],
             "weathercode": data["current_weather"]["weathercode"]
         }
-    except requests.exceptions.RequestException as e:
-        return JSONResponse(
-            status_code=503,
-            content={"error": "Sään haku epäonnistui", "details": str(e)}
+
+    except httpx.HTTPStatusError as e:
+        raise HTTPException(
+            status_code=e.response.status_code,
+            detail=f"Upstream weather API returned an error: {str(e)}"
         )
+
+    except httpx.RequestError as e:
+        raise HTTPException(
+            status_code=503,
+            detail=f"Weather API request failed: {str(e)}"
+        )
+
     except KeyError:
-        return JSONResponse(
+        raise HTTPException(
             status_code=500,
-            content={"error": "Sään haku epäonnistui", "details": "Väärä API-key"}
+            detail="Weather API returned unexpected structure"
         )

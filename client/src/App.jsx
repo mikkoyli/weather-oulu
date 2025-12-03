@@ -7,9 +7,9 @@ function App() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    fetch("http://localhost:5001/api/weather")
+    fetch("/api/weather")
       .then((res) => {
-        if (!res.ok) throw new Error(`Palvelin palautti virheen: ${res.status}`);
+        if (!res.ok) throw new Error(`Sääpalvelin palautti virheen: ${res.status}`);
         return res.json();
       })
       .then((data) => {
@@ -22,29 +22,28 @@ function App() {
       });
   }, []);
 
-  const getWeatherDescription = (code) => {
-    switch (code) {
-      case 0: return "Selkeää";
-      case 1:
-      case 2:
-      case 3: return "Osittain pilvistä";
-      case 45:
-      case 48: return "Sumua";
-      case 51:
-      case 53:
-      case 55: return "Tihkusadetta";
-      case 61:
-      case 63:
-      case 65: return "Sadetta";
-      case 71:
-      case 73:
-      case 75: return "Lunta";
-      case 95:
-      case 96:
-      case 99: return "Ukkosta";
-      default: return "Tuntematon";
-    }
+    const WEATHER_TEXT = {
+    0: "Selkeää",
+    1: "Osittain pilvistä",
+    2: "Osittain pilvistä",
+    3: "Osittain pilvistä",
+    45: "Sumua",
+    48: "Sumua",
+    51: "Tihkusadetta",
+    53: "Tihkusadetta",
+    55: "Tihkusadetta",
+    61: "Sadetta",
+    63: "Sadetta",
+    65: "Sadetta",
+    71: "Lunta",
+    73: "Lunta",
+    75: "Lunta",
+    95: "Ukkosta",
+    96: "Ukkosta",
+    99: "Ukkosta",
   };
+
+  const getWeatherDescription = (code) => WEATHER_TEXT[code] || "Tuntematon";
 
   if (loading) return <p style={{ textAlign: "center", marginTop: "50px" }}>Ladataan säätietoja...</p>;
 
