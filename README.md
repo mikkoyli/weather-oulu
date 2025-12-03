@@ -6,7 +6,7 @@ Yksinkertainen sääsovellus, joka hakee säädatan Open-Meteosta.
 
 - Näyttää Oulun nykyisen lämpötilan, tuulen nopeuden, ajan ja  säätilan tekstinä 
 - Backend tehty **FastAPI:lla (Python)**  
-- Frontend tehty **Reactilla (Vite)**  
+- Frontend tehty **Vite (Node.js)**  
 
 ---
 
